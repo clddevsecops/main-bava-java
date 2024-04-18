@@ -18,7 +18,7 @@ jobs:
       - name: Get list of changed files
         id: files
         run: |
-          echo "files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | jq -R -s -c 'split(\"\n\")[:-1]')" >> $GITHUB_ENV
+          echo "files=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})" >> $GITHUB_ENV
 
       - name: Trigger IMS BAVA Service WF
         if: contains(env.files, 'Java/IMS.BavaServices/')
