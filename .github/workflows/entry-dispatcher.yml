@@ -14,10 +14,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Echo changed files
+        run: echo "Changed files: ${{ toJSON(github.event.pull_request.files.*.filename) }}"
 
       - name: Trigger IMS BAVA Service WF
-        if: |
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/')
+        if: contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
@@ -30,8 +32,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
-        if: |
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/')
+        if: contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
