@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
       - name: Get list of changed files
         id: get_changed_files
         uses: actions/github-script@v3
@@ -32,15 +32,18 @@ jobs:
             });
             
             const listFilesResponse = await github.paginate(listFilesOptions);
-            const changedFiles = listFilesResponse.map(file => file.filename);
+            const changedFiles = listFilesResponse.map(file => file.filename).join(',');
             
-            core.setOutput('changed_files', changedFiles.join(','));
+            core.setOutput('changed_files', changedFiles);
+
+      - name: Set changed files as env variable
+        run: echo "CHANGED_FILES=${{ steps.get_changed_files.outputs.changed_files }}" >> $GITHUB_ENV
 
       - name: Echo changed files
-        run: echo "Changed files: ${{ steps.get_changed_files.outputs.changed_files }}"
+        run: echo "Changed files:" ${{ env.CHANGED_FILES }}
 
       - name: Trigger IMS BAVA Service WF
-        if: contains(steps.get_changed_files.outputs.changed_files, 'Java/IMS.BavaServices/')
+        if: contains(env.CHANGED_FILES, 'Java/IMS.BavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
@@ -53,7 +56,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
-        if: contains(steps.get_changed_files.outputs.changed_files, 'Java/IMS.JavaServices/')
+        if: contains(env.CHANGED_FILES, 'Java/IMS.JavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
