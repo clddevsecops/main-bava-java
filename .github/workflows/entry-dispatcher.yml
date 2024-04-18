@@ -23,7 +23,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            github.actions.createWorkflowDispatch({
+            github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'ims-bava-svcs.yml',
@@ -36,7 +36,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            github.actions.createWorkflowDispatch({
+            github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'ims-java-svcs.yml',
