@@ -15,8 +15,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       
+  
       - name: Echo changed files
-        run: echo "Changed files: ${{ toJSON(github.event.pull_request.files.*.filename) }}"
+        run: echo "Changed files:" ${{ toJson(github.event.pull_request.files.*.filename) }}
+
 
       - name: Trigger IMS BAVA Service WF
         if: contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/')
