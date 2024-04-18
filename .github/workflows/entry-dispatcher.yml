@@ -16,12 +16,32 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get list of changed files
-        id: files
-        run: |
-          echo "files=$(git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }})" >> $GITHUB_ENV
+        id: get_changed_files
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const payload = context.payload;
+            const pull_number = payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
+              owner,
+              repo,
+              pull_number
+            });
+
+            const listFilesResponse = await github.paginate(listFilesOptions);
+            const changedFiles = listFilesResponse.map(file => file.filename);
+
+            core.setOutput('changed_files', changedFiles.join(','));
+
+      - name: Echo changed files
+        run: echo "Changed files: ${{ steps.get_changed_files.outputs.changed_files }}"
 
       - name: Trigger IMS BAVA Service WF
-        if: contains(env.files, 'Java/IMS.BavaServices/')
+        if: contains(steps.get_changed_files.outputs.changed_files, 'Java/IMS.BavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
@@ -34,7 +54,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
-        if: contains(env.files, 'Java/IMS.JavaServices/')
+        if: contains(steps.get_changed_files.outputs.changed_files, 'Java/IMS.JavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
