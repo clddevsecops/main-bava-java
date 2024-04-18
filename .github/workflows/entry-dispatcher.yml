@@ -1,0 +1,46 @@
+name: Entry Dispatcher
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Java/IMS.BavaServices/**'
+      - 'Java/IMS.JavaServices/**'
+
+jobs:
+  blockprdispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Trigger IMS BAVA  Service WF
+        if: |
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/') ||
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices.Interfaces/')
+        uses: actions/github-script@v3
+        with:
+          script: |
+            github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ims-bava-svcs.yml',
+              ref: context.ref
+            })
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger IMS JAVA Service WF
+        if: |
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/') ||
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices.UnitTests/')
+        uses: actions/github-script@v3
+        with:
+          script: |
+            github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ims-java-svcs.yml',
+              ref: context.ref
+            })
+          github-token: ${{ secrets.GITHUB_TOKEN }}
