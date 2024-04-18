@@ -30,12 +30,16 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ims-bava-svcs.yml',
-              ref: 'refs/heads/main'
-            }).catch(error => core.setFailed(error.message));
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'ims-bava-svcs.yml',
+                ref: 'refs/heads/main'
+              });
+            } catch (error) {
+              core.setFailed(`Error triggering workflow: ${error.message}`);
+            }
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
@@ -43,10 +47,14 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ims-java-svcs.yml',
-              ref: 'refs/heads/main'
-            }).catch(error => core.setFailed(error.message));
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'ims-java-svcs.yml',
+                ref: 'refs/heads/main'
+              });
+            } catch (error) {
+              core.setFailed(`Error triggering workflow: ${error.message}`);
+            }
           github-token: ${{ secrets.GITHUB_TOKEN }}
