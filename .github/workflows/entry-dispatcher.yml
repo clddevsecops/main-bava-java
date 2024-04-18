@@ -31,7 +31,7 @@ jobs:
             const javaChanged = changes.some(filename => filename.startsWith('Java/IMS.JavaServices'));
             return JSON.stringify({ bavaChanged, javaChanged });
           result-encoding: string
-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Output file checks
         run: |
           echo "BAVA Services changed: ${{ fromJson(steps.files.outputs.result).bavaChanged }}"
@@ -48,7 +48,7 @@ jobs:
               workflow_id: 'ims-bava-svcs.yml',
               ref: 'refs/heads/main'
             });
-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Trigger IMS JAVA Service WF
         if: fromJson(steps.files.outputs.result).javaChanged
         uses: actions/github-script@v5
@@ -60,3 +60,4 @@ jobs:
               workflow_id: 'ims-java-svcs.yml',
               ref: 'refs/heads/main'
             });
+          github-token: ${{ secrets.GITHUB_TOKEN }}
