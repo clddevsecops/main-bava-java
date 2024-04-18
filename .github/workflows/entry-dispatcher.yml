@@ -16,30 +16,29 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Get list of changed files
-        id: get_files
-        uses: actions/github-script@v3
+        id: files
+        uses: actions/github-script@v5  # Ensure using the latest version
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pull_number = context.payload.pull_request.number;
-            const files = await github.rest.pulls.listFiles({
+            const payload = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: pull_number
+              pull_number: context.issue.number,  // Ensure you're using issue.number for PR number
             });
-            const fileList = files.data.map(file => file.filename);
-            const bavaChanged = fileList.some(file => file.startsWith('Java/IMS.BavaServices'));
-            const javaChanged = fileList.some(file => file.startsWith('Java/IMS.JavaServices'));
+            const changes = payload.data.map(file => file.filename);
+            const bavaChanged = changes.some(filename => filename.startsWith('Java/IMS.BavaServices'));
+            const javaChanged = changes.some(filename => filename.startsWith('Java/IMS.JavaServices'));
             return { bavaChanged, javaChanged };
+          result-encoding: string  # This ensures that the outputs are returned as strings
 
-      - name: Set result as outputs
+      - name: Output file checks
         run: |
-          echo "BAVA_CHANGED=${{ steps.get_files.outputs.bavaChanged }}" >> $GITHUB_ENV
-          echo "JAVA_CHANGED=${{ steps.get_files.outputs.javaChanged }}" >> $GITHUB_ENV
+          echo "BAVA Services changed: ${{ fromJson(steps.files.outputs.result).bavaChanged }}"
+          echo "JAVA Services changed: ${{ fromJson(steps.files.outputs.result).javaChanged }}"
 
       - name: Trigger IMS BAVA Service WF
-        if: ${{ env.BAVA_CHANGED }}
-        uses: actions/github-script@v3
+        if: fromJson(steps.files.outputs.result).bavaChanged
+        uses: actions/github-script@v5
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -50,8 +49,8 @@ jobs:
             });
 
       - name: Trigger IMS JAVA Service WF
-        if: ${{ env.JAVA_CHANGED }}
-        uses: actions/github-script@v3
+        if: fromJson(steps.files.outputs.result).javaChanged
+        uses: actions/github-script@v5
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
