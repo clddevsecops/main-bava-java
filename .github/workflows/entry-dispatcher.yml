@@ -9,23 +9,19 @@ on:
       - 'Java/IMS.JavaServices/**'
 
 jobs:
-  blockprdispatch:
+  dispatch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
-      - name: Echo changed files
-        run: echo "Changed files:" ${{ toJson(github.event.pull_request.files.*.filename) }}
-
+      - name: Get list of changed files
+        id: files
+        run: |
+          echo "files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | jq -R -s -c 'split(\"\n\")[:-1]')" >> $GITHUB_ENV
 
       - name: Trigger IMS BAVA Service WF
-        if: contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/')
+        if: contains(env.files, 'Java/IMS.BavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
@@ -38,7 +34,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
-        if: contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/')
+        if: contains(env.files, 'Java/IMS.JavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
