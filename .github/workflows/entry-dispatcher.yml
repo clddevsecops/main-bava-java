@@ -15,10 +15,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Trigger IMS BAVA  Service WF
+      - name: Trigger IMS BAVA Service WF
         if: |
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/') ||
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices.Interfaces/')
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.BavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
@@ -32,8 +31,7 @@ jobs:
 
       - name: Trigger IMS JAVA Service WF
         if: |
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/') ||
-          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices.UnitTests/')
+          contains(toJSON(github.event.pull_request.files.*.filename), 'Java/IMS.JavaServices/')
         uses: actions/github-script@v3
         with:
           script: |
