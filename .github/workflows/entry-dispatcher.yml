@@ -35,7 +35,7 @@ jobs:
               repo: context.repo.repo,
               workflow_id: 'ims-bava-svcs.yml',
               ref: 'refs/heads/main'
-            })
+            }).catch(error => core.setFailed(error.message));
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
@@ -48,5 +48,5 @@ jobs:
               repo: context.repo.repo,
               workflow_id: 'ims-java-svcs.yml',
               ref: 'refs/heads/main'
-            })
+            }).catch(error => core.setFailed(error.message));
           github-token: ${{ secrets.GITHUB_TOKEN }}
