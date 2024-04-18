@@ -14,36 +14,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Set up environment
+        run: |
+          echo "BAVA_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'Java/IMS.BavaServices/' | wc -l)" >> $GITHUB_ENV
+          echo "JAVA_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'Java/IMS.JavaServices/' | wc -l)" >> $GITHUB_ENV
 
-      - name: Get list of changed files
-        id: get_changed_files
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pull_number = context.payload.pull_request.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
-            const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
-              owner,
-              repo,
-              pull_number
-            });
-            
-            const listFilesResponse = await github.paginate(listFilesOptions);
-            const changedFiles = listFilesResponse.map(file => file.filename).join(',');
-            
-            core.setOutput('changed_files', changedFiles);
-
-      - name: Set changed files as env variable
-        run: echo "CHANGED_FILES=${{ steps.get_changed_files.outputs.changed_files }}" >> $GITHUB_ENV
-
-      - name: Echo changed files
-        run: echo "Changed files:" ${{ env.CHANGED_FILES }}
+      - name: Echo paths changed
+        run: |
+          echo "BAVA Services changed: $BAVA_CHANGED"
+          echo "JAVA Services changed: $JAVA_CHANGED"
 
       - name: Trigger IMS BAVA Service WF
-        if: contains(env.CHANGED_FILES, 'Java/IMS.BavaServices/')
+        if: ${{ env.BAVA_CHANGED }} != '0'
         uses: actions/github-script@v3
         with:
           script: |
@@ -56,7 +39,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger IMS JAVA Service WF
-        if: contains(env.CHANGED_FILES, 'Java/IMS.JavaServices/')
+        if: ${{ env.JAVA_CHANGED }} != '0'
         uses: actions/github-script@v3
         with:
           script: |
