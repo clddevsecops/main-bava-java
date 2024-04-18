@@ -4,18 +4,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  java-service-job:
+  build-java:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Build and Test
+        run: echo "Hello World - Java"
 
-      # Include additional steps here that you need for your job
-      # Make sure that each step is correctly formatted and the scripts are correct
-
-      - name: Placeholder step
-        run: |
-          echo "This is a placeholder step."
-          # Replace this with your actual steps and scripts
-
-      # Check for indentation and syntax in each step
