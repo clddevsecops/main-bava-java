@@ -1,0 +1,13 @@
+name: IMS Java Build Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build and Test
+        run: echo "Running .NET Data Saving Service build and tests"
