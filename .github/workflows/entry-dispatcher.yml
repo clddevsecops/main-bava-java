@@ -14,27 +14,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      
       - name: Get list of changed files
         id: get_changed_files
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const payload = context.payload;
-            const pull_number = payload.pull_request.number;
+            const pull_number = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-
+            
             const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
               owner,
               repo,
               pull_number
             });
-
+            
             const listFilesResponse = await github.paginate(listFilesOptions);
             const changedFiles = listFilesResponse.map(file => file.filename);
-
+            
             core.setOutput('changed_files', changedFiles.join(','));
 
       - name: Echo changed files
