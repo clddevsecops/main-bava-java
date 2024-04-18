@@ -14,8 +14,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
-  
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: Echo changed files
         run: echo "Changed files:" ${{ toJson(github.event.pull_request.files.*.filename) }}
 
