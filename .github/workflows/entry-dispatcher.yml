@@ -15,46 +15,48 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up environment
-        run: |
-          echo "BAVA_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'Java/IMS.BavaServices/' | wc -l)" >> $GITHUB_ENV
-          echo "JAVA_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'Java/IMS.JavaServices/' | wc -l)" >> $GITHUB_ENV
+      - name: Get list of changed files
+        id: get_files
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pull_number = context.payload.pull_request.number;
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number
+            });
+            const fileList = files.data.map(file => file.filename);
+            const bavaChanged = fileList.some(file => file.startsWith('Java/IMS.BavaServices'));
+            const javaChanged = fileList.some(file => file.startsWith('Java/IMS.JavaServices'));
+            return { bavaChanged, javaChanged };
 
-      - name: Echo paths changed
+      - name: Set result as outputs
         run: |
-          echo "BAVA Services changed: $BAVA_CHANGED"
-          echo "JAVA Services changed: $JAVA_CHANGED"
+          echo "BAVA_CHANGED=${{ steps.get_files.outputs.bavaChanged }}" >> $GITHUB_ENV
+          echo "JAVA_CHANGED=${{ steps.get_files.outputs.javaChanged }}" >> $GITHUB_ENV
 
       - name: Trigger IMS BAVA Service WF
-        if: ${{ env.BAVA_CHANGED }} != '0'
+        if: ${{ env.BAVA_CHANGED }}
         uses: actions/github-script@v3
         with:
           script: |
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'ims-bava-svcs.yml',
-                ref: 'refs/heads/main'
-              });
-            } catch (error) {
-              core.setFailed(`Error triggering workflow: ${error.message}`);
-            }
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ims-bava-svcs.yml',
+              ref: 'refs/heads/main'
+            });
 
       - name: Trigger IMS JAVA Service WF
-        if: ${{ env.JAVA_CHANGED }} != '0'
+        if: ${{ env.JAVA_CHANGED }}
         uses: actions/github-script@v3
         with:
           script: |
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'ims-java-svcs.yml',
-                ref: 'refs/heads/main'
-              });
-            } catch (error) {
-              core.setFailed(`Error triggering workflow: ${error.message}`);
-            }
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ims-java-svcs.yml',
+              ref: 'refs/heads/main'
+            });
