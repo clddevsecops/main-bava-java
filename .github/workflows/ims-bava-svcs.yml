@@ -4,10 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-test:
+  build-bava:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
       - name: Build and Test
-        run: echo "Running Job System build and tests"
+        run: echo "Hello World - Bava"
