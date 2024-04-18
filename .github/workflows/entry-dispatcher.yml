@@ -17,19 +17,20 @@ jobs:
 
       - name: Get list of changed files
         id: files
-        uses: actions/github-script@v5  # Ensure using the latest version
+        uses: actions/github-script@v5
         with:
           script: |
-            const payload = await github.rest.pulls.listFiles({
+            const pull_number = context.payload.pull_request.number;
+            const files = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.issue.number,  // Ensure you're using issue.number for PR number
+              pull_number: pull_number
             });
-            const changes = payload.data.map(file => file.filename);
+            const changes = files.data.map(file => file.filename);
             const bavaChanged = changes.some(filename => filename.startsWith('Java/IMS.BavaServices'));
             const javaChanged = changes.some(filename => filename.startsWith('Java/IMS.JavaServices'));
-            return { bavaChanged, javaChanged };
-          result-encoding: string  # This ensures that the outputs are returned as strings
+            return JSON.stringify({ bavaChanged, javaChanged });
+          result-encoding: string
 
       - name: Output file checks
         run: |
