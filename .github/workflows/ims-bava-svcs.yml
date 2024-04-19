@@ -8,4 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build and Test
-        run: echo "Hello World - Bava"
+        run: |
+          echo "Hello World - Bava"
+          exit 1
