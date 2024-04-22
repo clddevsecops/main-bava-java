@@ -40,29 +40,13 @@ jobs:
 
       - name: Trigger IMS BAVA Service WF
         if: fromJson(steps.files.outputs.result).bavaChanged
-        uses: actions/github-script@v5
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ims-bava-svcs.yml',
-              ref: 'refs/heads/main'
-            });
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "Trigger IMS BAVA Service Workflow"
+        # Add your commands to trigger the BAVA Service workflow here
 
       - name: Trigger IMS JAVA Service WF
         if: fromJson(steps.files.outputs.result).javaChanged
-        uses: actions/github-script@v5
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ims-java-svcs.yml',
-              ref: 'refs/heads/main'
-            });
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "Trigger IMS JAVA Service Workflow"
+        # Add your commands to trigger the JAVA Service workflow here
 
   status-check:
     runs-on: ubuntu-latest
