@@ -49,9 +49,7 @@ jobs:
         run: echo "Trigger IMS JAVA Service Workflow"
         # Add your commands to trigger the JAVA Service workflow here
 
-      - name: Wait for completion
-        id: wait-for-completion
-        run: sleep 30s  # Adjust the sleep time as needed
+      # Add more steps as needed for other actions
 
       - name: Finalize Job Status
         id: check-status
