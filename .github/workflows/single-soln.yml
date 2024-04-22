@@ -49,8 +49,13 @@ jobs:
         run: echo "Trigger IMS JAVA Service Workflow"
         # Add your commands to trigger the JAVA Service workflow here
 
+      - name: Wait for completion
+        id: wait-for-completion
+        run: sleep 30s  # Adjust the sleep time as needed
+
       - name: Finalize Job Status
         id: check-status
+        if: always()
         run: |
           status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" | jq -r '.status')
           if [[ "$status" != "completed" ]]; then
