@@ -61,10 +61,11 @@ jobs:
           repo: ${{ github.event.repository.name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check workflow status
+      - name: Check Workflow Status
         run: |
-          status=$(echo "${{ steps.wait-for-workflow.outputs.data }}" | jq -r '.status')
-          if [[ "$status" != "completed" ]]; then
-            echo "Workflow is not completed yet."
-            exit 1
-          fi
+           status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/clddevsecops/main-bava-java/actions/workflows/{workflow_id}/runs/{run_id}" | jq -r '.status')
+           if [[ "$status" != "completed" ]]; then
+           echo "Workflow is not completed yet."
+           exit 1
+           fi
+
