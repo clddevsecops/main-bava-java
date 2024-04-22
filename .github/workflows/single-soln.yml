@@ -48,7 +48,7 @@ jobs:
         run: echo "Trigger IMS JAVA Service Workflow"
         # Add your commands to trigger the JAVA Service workflow here
 
-   status-check:
+  status-check:
     runs-on: ubuntu-latest
     needs: dispatch
     steps:
