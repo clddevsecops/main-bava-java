@@ -1,4 +1,4 @@
-name: Entry Dispatcher
+name: Entry Single Dispatcher
 
 on:
   pull_request:
@@ -63,9 +63,8 @@ jobs:
 
       - name: Check Workflow Status
         run: |
-           status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/clddevsecops/main-bava-java/actions/workflows/{workflow_id}/runs/{run_id}" | jq -r '.status')
+           status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs/${{ github.run_id }}" | jq -r '.status')
            if [[ "$status" != "completed" ]]; then
            echo "Workflow is not completed yet."
            exit 1
            fi
-
