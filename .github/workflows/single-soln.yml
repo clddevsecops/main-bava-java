@@ -56,13 +56,13 @@ jobs:
         id: wait-for-workflow
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/clddevsecops/main-bava-java/actions/runs/${{ github.run_id }}
+          route: GET /repos/:owner/:repo/actions/runs/${{ github.run_id }}
           mediaType: '{"previews":["antiope","ant-man-preview","machine-man-preview"]}'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Workflow Status
         run: |
-          status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/clddevsecops/main-bava-java/actions/runs/${{ steps.wait-for-workflow.outputs.data.id }}" | jq -r '.status')
+          status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ steps.wait-for-workflow.outputs.data.id }}" | jq -r '.status')
           if [[ "$status" != "completed" ]]; then
             echo "Workflow is not completed yet."
             exit 1
