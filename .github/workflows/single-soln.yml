@@ -63,10 +63,10 @@ jobs:
 
       - name: Check Workflow Status
         run: |
-           status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/clddevsecops/main-bava-java/actions/workflows/Entry Single Dispatcher/runs/${{ steps.wait-for-workflow.outputs.data.id }}" | jq -r '.status')
-           if [[ "$status" != "completed" ]]; then
-             echo "Workflow is not completed yet."
-             exit 1
-           else
-             echo "Workflow completed successfully."
-           fi
+          status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/clddevsecops/main-bava-java/actions/workflows/Entry Single Dispatcher/runs/${{ steps.wait-for-workflow.outputs.data.id }}" | jq -r '.status')
+          if [[ "$status" != "completed" ]]; then
+            echo "Workflow is not completed yet."
+            exit 1
+          else
+            echo "Workflow completed successfully."
+          fi
