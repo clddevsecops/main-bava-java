@@ -11,54 +11,37 @@ on:
 jobs:
   dispatch:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Get list of changed files
         id: files
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const pull_number = context.payload.pull_request.number;
-            const files = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pull_number
-            });
-            const changes = files.data.map(file => file.filename);
-            const bavaChanged = changes.some(filename => filename.startsWith('Java/IMS.BavaServices'));
-            const javaChanged = changes.some(filename => filename.startsWith('Java/IMS.JavaServices'));
-            return JSON.stringify({ bavaChanged, javaChanged });
-          result-encoding: string
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          bavaChanged=false
+          javaChanged=false
+          for file in $changes; do
+            if [[ $file == 'Java/IMS.BavaServices/'* ]]; then
+              bavaChanged=true
+            elif [[ $file == 'Java/IMS.JavaServices/'* ]]; then
+              javaChanged=true
+            fi
+          done
+          echo "::set-output name=bavaChanged::$bavaChanged"
+          echo "::set-output name=javaChanged::$javaChanged"
 
       - name: Output file checks
         run: |
-          echo "BAVA Services changed: ${{ fromJson(steps.files.outputs.result).bavaChanged }}"
-          echo "JAVA Services changed: ${{ fromJson(steps.files.outputs.result).javaChanged }}"
+          echo "BAVA Services changed: ${{ steps.files.outputs.bavaChanged }}"
+          echo "JAVA Services changed: ${{ steps.files.outputs.javaChanged }}"
 
       - name: Trigger IMS BAVA Service WF
-        if: fromJson(steps.files.outputs.result).bavaChanged
+        if: steps.files.outputs.bavaChanged == 'true'
         run: echo "Trigger IMS BAVA Service Workflow"
         # Add your commands to trigger the BAVA Service workflow here
 
       - name: Trigger IMS JAVA Service WF
-        if: fromJson(steps.files.outputs.result).javaChanged
+        if: steps.files.outputs.javaChanged == 'true'
         run: echo "Trigger IMS JAVA Service Workflow"
         # Add your commands to trigger the JAVA Service workflow here
-
-      # Add more steps as needed for other actions
-
-      - name: Finalize Job Status
-        id: check-status
-        if: always()
-        run: |
-          status=$(curl -s -X GET -u ${{ secrets.GITHUB_TOKEN }} "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" | jq -r '.status')
-          if [[ "$status" != "completed" ]]; then
-            echo "Workflow is not completed yet."
-            exit 1
-          else
-            echo "Workflow completed successfully."
-          fi
