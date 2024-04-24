@@ -44,4 +44,4 @@ jobs:
       - name: Trigger IMS JAVA Service WF
         if: steps.files.outputs.javaChanged == 'true'
         run: echo "Trigger IMS JAVA Service Workflow"
-        # Add your commands to trigger the JAVA Service workflow here
+        # Add your commands hre to trigger the JAVA Service workflow here
